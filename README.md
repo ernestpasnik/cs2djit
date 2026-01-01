@@ -40,9 +40,14 @@ gcc -m32 -shared -fPIC \
 ## Usage
 
 ```bash
-LD_PRELOAD=./libcs2djit.so cs2d_dedicated
+LD_PRELOAD=./libcs2djit.so cs2d
 ```
 
 ## CI/CD
 
-Every push to `main`/`master` automatically builds and uploads `libcs2djit.so` as an artifact. Tagged releases (e.g., `v1.0.0`) create GitHub releases with the binary attached.
+Every push to `main`/`master` automatically builds and uploads `libcs2djit.so` as an artifact. To create a release, include `[release]` in your commit message:
+
+```bash
+git commit -m "Update build [release]"
+git push
+```
