@@ -1,3 +1,7 @@
+[submodule "luajit"]
+	path = luajit
+	url = https://github.com/LuaJIT/LuaJIT.git
+
 [submodule "luawrap"]
 	path = luawrap
 	url = https://github.com/MikuAuahDark/cs2dluawrap
