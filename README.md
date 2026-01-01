@@ -1,15 +1,36 @@
-# CS2DJIT Fork
+# CS2DJIT
 
-This repository is a **fork** of [cs2djit](https://github.com/MikuAuahDark/cs2djit) by [Miku AuahDark](https://github.com/MikuAuahDark).
+Fork of [cs2djit](https://github.com/MikuAuahDark/cs2djit) by [Miku AuahDark](https://github.com/MikuAuahDark).
 
-`git clone --recurse-submodules https://github.com/ernestpasnik/cs2djit.git`
+## Prerequisites
 
-## License
+Install required packages for building 32-bit LuaJIT:
 
-Copyright (c) 2020 Miku AuahDark
+```bash
+sudo apt-get update
+sudo apt-get install -y git build-essential gcc-multilib g++-multilib
+```
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+## Install
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+```bash
+git clone --recurse-submodules https://github.com/ernestpasnik/cs2djit.git
+cd cs2djit
+```
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## Build
+
+```bash
+# Build 32-bit LuaJIT
+cd luajit
+make clean
+make BUILDMODE=static CC="gcc -m32"
+cd ..
+
+# Build CS2DJIT
+gcc -m32 -shared -fPIC \
+  -I./luajit/src \
+  src/cs2djitbase.c src/cs2djitmem.c src/cs2djitlinux.c \
+  ./luajit/src/libluajit.a \
+  -o libcs2djit.so
+```
