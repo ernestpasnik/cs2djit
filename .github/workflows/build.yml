@@ -1,0 +1,67 @@
+name: Build and Test CS2DJIT
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc-multilib g++-multilib
+    
+    - name: Build LuaJIT
+      run: |
+        cd luajit
+        make clean
+        make BUILDMODE=static CC="gcc -m32"
+        cd ..
+    
+    - name: Build CS2DJIT
+      run: |
+        gcc -m32 -shared -fPIC \
+          -I./luajit/src \
+          src/cs2djitbase.c src/cs2djitmem.c src/cs2djitlinux.c \
+          ./luajit/src/libluajit.a \
+          -o libcs2djit.so
+    
+    - name: Verify build
+      run: |
+        if [ ! -f libcs2djit.so ]; then
+          echo "❌ libcs2djit.so not found!"
+          exit 1
+        fi
+        echo "✅ libcs2djit.so built successfully"
+        ls -lh libcs2djit.so
+    
+    - name: Check library dependencies
+      run: |
+        ldd libcs2djit.so || true
+        file libcs2djit.so
+    
+    - name: Test LuaJIT symbols
+      run: |
+        if nm libcs2djit.so | grep -q "luaJIT"; then
+          echo "✅ LuaJIT symbols found in library"
+        else
+          echo "⚠️  No LuaJIT symbols detected"
+        fi
+        echo "Library symbols:"
+        nm -D libcs2djit.so | head -20
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: libcs2djit-so
+        path: libcs2djit.so
