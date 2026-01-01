@@ -10,10 +10,44 @@ This repository provides automated builds of 32-bit LuaJIT and CS2DJIT library t
 
 ## Quick Start
 
-Download `libcs2djit.so` from [Releases](../../releases/latest) and run:
+Download the latest release:
+
+```bash
+wget https://github.com/ernestpasnik/cs2djit/releases/latest/download/libcs2djit.so
+```
+
+Run CS2D Dedicated Server with LuaJIT:
 
 ```bash
 LD_PRELOAD=./libcs2djit.so ./cs2d_dedicated
+```
+
+### Systemd Service
+
+Add `LD_PRELOAD` to your systemd service file:
+
+```ini
+[Unit]
+Description=CS2D Dedicated Server
+After=network.target
+
+[Service]
+Type=simple
+User=cs2d
+WorkingDirectory=/path/to/cs2d
+Environment="LD_PRELOAD=/path/to/libcs2djit.so"
+ExecStart=/path/to/cs2d_dedicated
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Reload and restart:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart cs2d
 ```
 
 ## Build from Source
