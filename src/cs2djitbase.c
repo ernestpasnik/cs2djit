@@ -41,8 +41,6 @@
 /* Platform selection */
 #if defined(CS2DLUA_TARGET_WIN)
 #	include "../luawrap/address/win_1.0.1.6.h"
-#elif defined(CS2DLUA_TARGET_MAC)
-#	error "Patches welcome for macOS!"
 #elif defined(CS2DLUA_TARGET_LINUX)
 #	include "../luawrap/address/linux_1.0.1.6.h"
 #else
@@ -117,9 +115,6 @@ static void patchJumpAddress(size_t addr, size_t funcAddr)
 	size_t calcAddress;
 	unsigned char *target = (unsigned char *) addr;
 
-#ifdef CS2DLUA_TARGET_MAC
-#	error "TODO: calculate 64-bit jmp address"
-#else
 	/* jmp rel32 <the actual LuaJIT address> */
 	target[0] = 0xE9; /* jmp rel32 */
 
@@ -129,7 +124,6 @@ static void patchJumpAddress(size_t addr, size_t funcAddr)
 	target[2] = (calcAddress >> 8) & 0xFF;
 	target[3] = (calcAddress >> 16) & 0xFF;
 	target[4] = (calcAddress >> 24) & 0xFF;
-#endif
 }
 
 int cs2djit_init(size_t baseAddress, FILE *exe)

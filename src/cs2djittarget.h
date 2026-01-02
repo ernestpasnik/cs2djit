@@ -25,8 +25,6 @@
 
 #if defined(_WIN32)
 #	define CS2DLUA_TARGET_WIN
-#elif defined(__APPLE__)
-#	define CS2DLUA_TARGET_MAC
 #else
 #	define CS2DLUA_TARGET_LINUX
 #endif
