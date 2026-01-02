@@ -128,15 +128,19 @@ static void patchJumpAddress(size_t addr, size_t funcAddr)
 
 int cs2djit_init(size_t baseAddress, FILE *exe)
 {
-	unsigned char fileByte;
+	unsigned char buffer[8192];
 	unsigned int crcExe = 0xFFFFFFFF;
 	size_t *luaFuncPtr, minAddress = (size_t) -1, maxAddress = 0, targetAddress, targetOffset;
 	size_t i = (((size_t) &luaFunction.lua_newstate) - ((size_t) &luaFunction)) / sizeof(void*);
+	size_t bytesRead;
 	int protAccess;
 
-	/* Calculate CRC of the executable */
-	while (fread(&fileByte, 1, 1, exe) == 1)
-		crcExe = updateCRC32(fileByte, crcExe);
+	/* Calculate CRC of the executable - buffered for better performance */
+	while ((bytesRead = fread(buffer, 1, sizeof(buffer), exe)) > 0) {
+		for (size_t j = 0; j < bytesRead; j++) {
+			crcExe = updateCRC32(buffer[j], crcExe);
+		}
+	}
 
 	crcExe = ~crcExe;
 	if (crcExe == luaFunction.checksumDedicated)
@@ -171,7 +175,7 @@ int cs2djit_init(size_t baseAddress, FILE *exe)
 		return 0;
 	}
 
-	/* Second pass: Patch address */
+	/* Second pass: Patch addresses */
 #define PATCHJUMP(func) patchJumpAddress(targetAddress + (size_t) (luaFunction.func), (size_t) &func)
 	PATCHJUMP(lua_newstate);
 	PATCHJUMP(lua_close);
