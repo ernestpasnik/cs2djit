@@ -23,7 +23,7 @@
 #ifndef _CS2DJITTARGET_H_
 #define _CS2DJITTARGET_H_
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__WINDOWS__)
 #	define CS2DLUA_TARGET_WIN
 #else
 #	define CS2DLUA_TARGET_LINUX
