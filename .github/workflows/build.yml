@@ -1,68 +1,39 @@
-name: Build and Test CS2DJIT
+name: Build CS2DJIT
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
+    if: contains(github.event.head_commit.message, '[release]') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v6
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     
     - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y gcc-multilib libc6-dev-i386
+      run: sudo apt update && sudo apt install -y gcc-multilib libc6-dev-i386
     
     - name: Build LuaJIT
-      run: |
-        cd luajit
-        make BUILDMODE=static CC="gcc" CFLAGS="-m32 -fPIC -O2" -j$(nproc)
-        cd ..
+      run: cd luajit && make HOST_CC="gcc -m32" CC="gcc -m32" BUILDMODE=static -j$(nproc)
     
     - name: Build CS2DJIT
       run: |
-        gcc -m32 -shared -fPIC \
-          -O2 -s \
-          -Wall -Wextra \
+        gcc -m32 -shared -fPIC -O2 -s -Wall \
           -I./luajit/src \
-          src/cs2djitbase.c \
-          src/cs2djitmem.c \
-          src/cs2djitlinux.c \
+          src/*.c \
           ./luajit/src/libluajit.a \
           -o libcs2djit.so \
           -ldl -lpthread
     
-    - name: Verify build
-      run: |
-        if [ ! -f libcs2djit.so ]; then
-          echo "❌ libcs2djit.so not found!"
-          exit 1
-        fi
-        ls -lh libcs2djit.so
-    
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: libcs2djit-linux-x86
-        path: |
-          libcs2djit.so
-        retention-days: 30
-    
     - name: Create Release
-      if: contains(github.event.head_commit.message, '[release]')
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ github.run_number }}
-        name: Release v${{ github.run_number }}
         files: libcs2djit.so
         generate_release_notes: true
       env:
