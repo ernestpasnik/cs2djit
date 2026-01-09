@@ -55,8 +55,8 @@ sudo systemctl restart cs2d
 ### Prerequisites
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y build-essential gcc-multilib g++-multilib libc6-dev-i386
+sudo apt update
+sudo apt install -y gcc-multilib libc6-dev-i386
 ```
 
 ### Build
@@ -70,7 +70,7 @@ make clean
 make BUILDMODE=static CC="gcc -m32" -j$(nproc)
 cd ..
 
-gcc -m32 -shared -fPIC -O2 -Wall -Wextra \
+gcc -m32 -shared -fPIC -O2 -s -Wall -Wextra \
   -I./luajit/src \
   src/cs2djitbase.c src/cs2djitmem.c src/cs2djitlinux.c \
   ./luajit/src/libluajit.a \
